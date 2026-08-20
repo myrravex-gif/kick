@@ -17,7 +17,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from dotenv import load_dotenv
 
 # ---------------------------------------------------------------------------
-# 환경 변수 안전 로드 (빈 .env 파일이 시스템 환경 변수를 덮어쓰는 현상 방지)[cite: 2]
+# 환경 변수 안전 로드 (빈 .env 파일이 시스템 환경 변수를 덮어쓰는 현상 방지)
 # ---------------------------------------------------------------------------
 if os.path.exists(".env"):
     load_dotenv(override=False)
@@ -26,7 +26,7 @@ if os.path.exists(".env"):
             os.environ.pop(key, None)
 
 # ---------------------------------------------------------------------------
-# 🔍 [디버깅] 렐웨이가 실제로 전달해 준 환경 변수 키 및 상태 전체 출력
+# 🔍 [디버깅] 현재 시스템이 인식 중인 환경 변수 키 및 상태 전체 출력
 # ---------------------------------------------------------------------------
 print("=" * 60)
 print("🔍 [RAILWAY ENV DEBUG] 현재 시스템이 인식 중인 환경 변수 목록:")
@@ -36,7 +36,7 @@ for k, v in sorted(os.environ.items()):
 print("=" * 60)
 
 # ---------------------------------------------------------------------------
-# 로깅 설정[cite: 2]
+# 로깅 설정
 # ---------------------------------------------------------------------------
 logging.basicConfig(
     level=logging.INFO,
@@ -45,20 +45,20 @@ logging.basicConfig(
 logger = logging.getLogger("transfer-bot")
 
 # ---------------------------------------------------------------------------
-# 환경 변수 로드 및 검증[cite: 2]
+# 환경 변수 로드 및 검증
 # ---------------------------------------------------------------------------
 DISCORD_TOKEN = os.environ.get("DISCORD_TOKEN")
 TARGET_CHANNEL_ID = os.environ.get("TARGET_CHANNEL_ID")
 LOG_CHANNEL_ID = os.environ.get("LOG_CHANNEL_ID")
-EDUCATION_GUILD_ID = os.environ.get("EDUCATION_GUILD_ID")      # 추방 대상 서버 ID[cite: 2]
-COMMAND_GUILD_ID = os.environ.get("COMMAND_GUILD_ID")          # 슬래시 명령어 사용 서버 ID[cite: 2]
+EDUCATION_GUILD_ID = os.environ.get("EDUCATION_GUILD_ID")      # 추방 대상 서버 ID
+COMMAND_GUILD_ID = os.environ.get("COMMAND_GUILD_ID")          # 슬래시 명령어 사용 서버 ID
 GOOGLE_SERVICE_ACCOUNT = os.environ.get("GOOGLE_SERVICE_ACCOUNT")
 
 ROBLOX_COOKIE = os.environ.get("ROBLOX_COOKIE")
 ROBLOX_GROUP_ID = os.environ.get("ROBLOX_GROUP_ID")
 TRAINEE_ROLE_ID = os.environ.get("TRAINEE_ROLE_ID")
 EDUCATION_ROBLOX_GROUP_ID = os.environ.get("EDUCATION_ROBLOX_GROUP_ID")
-ADMIN_ROLE_IDS = os.environ.get("ADMIN_ROLE_IDS")  # 여러 관리자 역할 (쉼표로 구분)[cite: 2]
+ADMIN_ROLE_IDS = os.environ.get("ADMIN_ROLE_IDS")  # 여러 관리자 역할 (쉼표로 구분)
 
 TICKETY_BOT_ID = int(os.environ.get("TICKETY_BOT_ID", 0))
 
@@ -84,7 +84,7 @@ def validate_env_vars():
     if missing:
         raise EnvironmentError(
             f"필수 환경 변수가 설정되지 않았습니다: {', '.join(missing)}. "
-            "Railway Variables 또는 .env 파일을 확인해주세요."[cite: 2]
+            "Railway Variables 또는 .env 파일을 확인해주세요."
         )
 
     try:
@@ -99,7 +99,7 @@ def validate_env_vars():
             int(role_id.strip())
     except ValueError:
         raise EnvironmentError(
-            "채널 ID, 서버 ID, 그룹 ID, 역할 ID 값은 모두 숫자여야 합니다."[cite: 2]
+            "채널 ID, 서버 ID, 그룹 ID, 역할 ID 값은 모두 숫자여야 합니다."
         )
 
 
@@ -114,14 +114,14 @@ EDUCATION_ROBLOX_GROUP_ID = int(EDUCATION_ROBLOX_GROUP_ID)
 ADMIN_ROLE_IDS_LIST = [role_id.strip() for role_id in ADMIN_ROLE_IDS.split(",")]
 
 # ---------------------------------------------------------------------------
-# Flask keep_alive 서버[cite: 2]
+# Flask keep_alive 서버
 # ---------------------------------------------------------------------------
 app = Flask(__name__)
 
 
 @app.route("/")
 def home():
-    return "봇이 정상적으로 실행 중입니다."[cite: 2]
+    return "봇이 정상적으로 실행 중입니다."
 
 
 def run_flask():
@@ -137,7 +137,7 @@ def keep_alive():
 
 
 # ---------------------------------------------------------------------------
-# 구글 시트 연동[cite: 2]
+# 구글 시트 연동
 # ---------------------------------------------------------------------------
 GOOGLE_SCOPE = [
     "https://spreadsheets.google.com/feeds",
@@ -157,7 +157,7 @@ def _load_service_account_info(raw_value: str) -> dict:
         return json.loads(decoded)
     except (ValueError, json.JSONDecodeError) as exc:
         raise ValueError(
-            "GOOGLE_SERVICE_ACCOUNT 값을 JSON 또는 Base64(JSON)로 해석할 수 없습니다."[cite: 2]
+            "GOOGLE_SERVICE_ACCOUNT 값을 JSON 또는 Base64(JSON)로 해석할 수 없습니다."
         ) from exc
 
 
@@ -175,14 +175,14 @@ def get_worksheet():
 try:
     WORKSHEET = get_worksheet()
     logger.info(
-        "구글 시트 연동 성공: %s / %s", GOOGLE_SHEET_NAME, GOOGLE_WORKSHEET_NAME[cite: 2]
+        "구글 시트 연동 성공: %s / %s", GOOGLE_SHEET_NAME, GOOGLE_WORKSHEET_NAME
     )
 except Exception as exc:
-    logger.error("구글 시트 연동 실패: %s", exc)[cite: 2]
+    logger.error("구글 시트 연동 실패: %s", exc)
     raise
 
 # ---------------------------------------------------------------------------
-# 로블록스 API 연동 함수들[cite: 2]
+# 로블록스 API 연동 함수들
 # ---------------------------------------------------------------------------
 def get_roblox_user_id(username: str) -> int:
     url = "https://users.roblox.com/v1/usernames/users"
@@ -194,7 +194,7 @@ def get_roblox_user_id(username: str) -> int:
             if data:
                 return data[0].get("id")
     except Exception as exc:
-        logger.error("로블록스 유저 ID 조회 중 오류 발생: %s", exc)[cite: 2]
+        logger.error("로블록스 유저 ID 조회 중 오류 발생: %s", exc)
     return None
 
 
@@ -210,29 +210,29 @@ def change_roblox_group_rank(group_id: int, user_id: int, role_id: int) -> bool:
         csrf_token = resp.headers.get("x-csrf-token")
 
         if not csrf_token:
-            logger.error("로블록스 CSRF 토큰을 획득하지 못했습니다.")[cite: 2]
+            logger.error("로블록스 CSRF 토큰을 획득하지 못했습니다.")
             return False
 
         headers = {"X-CSRF-TOKEN": csrf_token}
         resp = session.patch(url, json={"roleId": role_id}, headers=headers)
 
         if resp.status_code == 200:
-            logger.info("🎉 로블록스 그룹(%s) 랭크 변경 성공: user_id=%s, role_id=%s", group_id, user_id, role_id)[cite: 2]
+            logger.info("🎉 로블록스 그룹(%s) 랭크 변경 성공: user_id=%s, role_id=%s", group_id, user_id, role_id)
             return True
         elif resp.status_code == 400:
             if "same role" in resp.text:
-                logger.info("로블록스 랭크 변경 생략: 유저가 이미 해당 역할(훈련병)을 가지고 있습니다. (user_id=%s)", user_id)[cite: 2]
+                logger.info("로블록스 랭크 변경 생략: 유저가 이미 해당 역할(훈련병)을 가지고 있습니다. (user_id=%s)", user_id)
                 return True
-            logger.warning("로블록스 랭크 변경 실패 (400 Bad Request): 응답: %s", resp.text)[cite: 2]
+            logger.warning("로블록스 랭크 변경 실패 (400 Bad Request): 응답: %s", resp.text)
             return False
         elif resp.status_code == 403:
-            logger.error("로블록스 랭크 변경 실패 (403 Forbidden): 응답: %s", resp.text)[cite: 2]
+            logger.error("로블록스 랭크 변경 실패 (403 Forbidden): 응답: %s", resp.text)
             return False
         else:
-            logger.error("로블록스 그룹 랭크 변경 실패: status=%s, body=%s", resp.status_code, resp.text)[cite: 2]
+            logger.error("로블록스 그룹 랭크 변경 실패: status=%s, body=%s", resp.status_code, resp.text)
             return False
     except Exception as exc:
-        logger.exception("로블록스 그룹 랭크 변경 중 예외 발생: %s", exc)[cite: 2]
+        logger.exception("로블록스 그룹 랭크 변경 중 예외 발생: %s", exc)
     return False
 
 
@@ -248,30 +248,30 @@ def exile_roblox_group_user(group_id: int, user_id: int) -> bool:
         csrf_token = resp.headers.get("x-csrf-token")
 
         if not csrf_token:
-            logger.error("로블록스 CSRF 토큰을 획득하지 못했습니다.")[cite: 2]
+            logger.error("로블록스 CSRF 토큰을 획득하지 못했습니다.")
             return False
 
         headers = {"X-CSRF-TOKEN": csrf_token}
         resp = session.delete(url, headers=headers)
 
         if resp.status_code == 200:
-            logger.info("로블록스 그룹(%s) 추방 성공: user_id=%s", group_id, user_id)[cite: 2]
+            logger.info("로블록스 그룹(%s) 추방 성공: user_id=%s", group_id, user_id)
             return True
         elif resp.status_code in (400, 403, 404):
-            logger.info("로블록스 그룹에 이미 존재하지 않음 (그룹 추방 생략): status=%s", resp.status_code)[cite: 2]
+            logger.info("로블록스 그룹에 이미 존재하지 않음 (그룹 추방 생략): status=%s", resp.status_code)
             return True
         else:
-            logger.error("로블록스 그룹 추방 실패: status=%s, body=%s", resp.status_code, resp.text)[cite: 2]
+            logger.error("로블록스 그룹 추방 실패: status=%s, body=%s", resp.status_code, resp.text)
             return False
     except Exception as exc:
-        logger.exception("로블록스 그룹 추방 중 예외 발생: %s", exc)[cite: 2]
+        logger.exception("로블록스 그룹 추방 중 예외 발생: %s", exc)
     return False
 
 
 async def handle_roblox_actions(roblox_nickname: str, message_type: str) -> bool:
     roblox_user_id = get_roblox_user_id(roblox_nickname)
     if not roblox_user_id:
-        logger.warning("로블록스 닉네임 '%s'에 해당하는 유저 ID를 찾을 수 없습니다.", roblox_nickname)[cite: 2]
+        logger.warning("로블록스 닉네임 '%s'에 해당하는 유저 ID를 찾을 수 없습니다.", roblox_nickname)
         return False
 
     success = True
@@ -289,7 +289,7 @@ async def handle_roblox_actions(roblox_nickname: str, message_type: str) -> bool
 
 
 # ---------------------------------------------------------------------------
-# 디스코드 공통 패턴 및 필터[cite: 2]
+# 디스코드 공통 패턴 및 필터
 # ---------------------------------------------------------------------------
 DISCORD_MENTION_PATTERN = re.compile(r"<[@#][!&]?\d+>")
 
@@ -342,7 +342,7 @@ def is_relevant_message(message: discord.Message) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# 유저네임, 숫자 ID, 멘션 변환 및 추출 함수들[cite: 2]
+# 유저네임, 숫자 ID, 멘션 변환 및 추출 함수들
 # ---------------------------------------------------------------------------
 async def resolve_identifier_to_user_id(guild: discord.Guild, identifier: str) -> str:
     if not identifier:
@@ -634,7 +634,7 @@ def format_iso_week(dt: datetime) -> str:
 
 
 # ---------------------------------------------------------------------------
-# 디스코드 클라이언트 설정 (명령어 사용 서버 = COMMAND_GUILD_ID 동기화)[cite: 2]
+# 디스코드 클라이언트 설정 (명령어 사용 서버 = COMMAND_GUILD_ID 동기화)
 # ---------------------------------------------------------------------------
 intents = discord.Intents.default()
 intents.message_content = True
@@ -650,14 +650,14 @@ class MyClient(discord.Client):
         cmd_guild = discord.Object(id=COMMAND_GUILD_ID)
         self.tree.copy_global_to(guild=cmd_guild)
         await self.tree.sync(guild=cmd_guild)
-        logger.info("디스코드 슬래시 명령어 지정 서버(COMMAND_GUILD_ID: %s) 즉시 동기화 완료", COMMAND_GUILD_ID)[cite: 2]
+        logger.info("디스코드 슬래시 명령어 지정 서버(COMMAND_GUILD_ID: %s) 즉시 동기화 완료", COMMAND_GUILD_ID)
 
 
 client = MyClient()
 
 
 # ---------------------------------------------------------------------------
-# 관리자 피드백 입력 Modal 클래스[cite: 2]
+# 관리자 피드백 입력 Modal 클래스
 # ---------------------------------------------------------------------------
 class AdminFeedbackModal(discord.ui.Modal):
     def __init__(self, action_type: str, original_message: discord.Message, original_discord_message: discord.Message, warning_reason: str, author_id: str, message_type: str, user_id: str, roblox_nickname: str, reason_text: str, jump_url: str, sent_messages: list):
@@ -707,7 +707,7 @@ class AdminFeedbackModal(discord.ui.Modal):
                 ]
 
                 WORKSHEET.append_row(row_data, value_input_option="USER_ENTERED")
-                logger.info("구글 시트 기록 완료: type=%s, user_id=%s, category=%s", self.message_type, self.user_id, category)[cite: 2]
+                logger.info("구글 시트 기록 완료: type=%s, user_id=%s, category=%s", self.message_type, self.user_id, category)
                 
                 await asyncio.sleep(1.0)
                 await perform_discord_kick_and_roblox_actions(
@@ -719,7 +719,7 @@ class AdminFeedbackModal(discord.ui.Modal):
                     self.author_id
                 )
             except Exception as e:
-                logger.exception("처리 완료 작업 중 오류 발생: %s", e)[cite: 2]
+                logger.exception("처리 완료 작업 중 오류 발생: %s", e)
 
         admin_desc = (
             f"**상태:** {status_label} (처리자: {interaction.user.mention})\n\n"
@@ -747,7 +747,7 @@ class AdminFeedbackModal(discord.ui.Modal):
             try:
                 await msg.edit(embed=updated_embed, view=disabled_view)
             except Exception as e:
-                logger.error("관리자 DM 수정 중 오류 발생: %s", e)[cite: 2]
+                logger.error("관리자 DM 수정 중 오류 발생: %s", e)
 
         if self.original_discord_message:
             try:
@@ -786,11 +786,11 @@ class AdminFeedbackModal(discord.ui.Modal):
 
                     await user_obj.send(embed=user_embed)
         except Exception as e:
-            logger.warning("신청자(작성자)에게 결과 DM 전송 실패 (DM 차단 등): %s", e)[cite: 2]
+            logger.warning("신청자(작성자)에게 결과 DM 전송 실패 (DM 차단 등): %s", e)
 
 
 # ---------------------------------------------------------------------------
-# 관리자 경고 알림 View 클래스[cite: 2]
+# 관리자 경고 알림 View 클래스
 # ---------------------------------------------------------------------------
 class AdminWarningView(discord.ui.View):
     def __init__(self, warning_reason: str, author_id: str, message_type: str, user_id: str, roblox_nickname: str, reason_text: str, jump_url: str, original_message: discord.Message):
@@ -850,7 +850,7 @@ class AdminWarningView(discord.ui.View):
 
 
 # ---------------------------------------------------------------------------
-# 경고 알림 전송 함수[cite: 2]
+# 경고 알림 전송 함수
 # ---------------------------------------------------------------------------
 async def send_admin_warning_alert(message: discord.Message, reason: str, message_type: str, user_id: str, roblox_nickname: str, reason_text: str, author_id: str = None):
     try:
@@ -905,11 +905,11 @@ async def send_admin_warning_alert(message: discord.Message, reason: str, messag
                     sent_msg = await member.send(embed=embed, view=view)
                     view.sent_messages.append(sent_msg)
                 except discord.Forbidden:
-                    logger.warning("멤버 %s님에게 DM을 보낼 수 없습니다 (DM 차단 등).", member.name)[cite: 2]
+                    logger.warning("멤버 %s님에게 DM을 보낼 수 없습니다 (DM 차단 등).", member.name)
                 except Exception as e:
-                    logger.error("DM 전송 중 오류 발생: %s", e)[cite: 2]
+                    logger.error("DM 전송 중 오류 발생: %s", e)
     except Exception as exc:
-        logger.exception("관리자 경고 알림 전송 중 오류 발생: %s", exc)[cite: 2]
+        logger.exception("관리자 경고 알림 전송 중 오류 발생: %s", exc)
 
 
 async def add_warning_reaction_and_alert(message: discord.Message, reason: str, message_type: str, user_id: str, roblox_nickname: str, reason_text: str, author_id: str = None):
@@ -921,12 +921,12 @@ async def add_warning_reaction_and_alert(message: discord.Message, reason: str, 
 
 
 # ---------------------------------------------------------------------------
-# 실제 액션 처리 함수 (시트 기록 후 버튼 눌렀을 때만 실행)[cite: 2]
+# 실제 액션 처리 함수 (시트 기록 후 버튼 눌렀을 때만 실행)
 # ---------------------------------------------------------------------------
 async def perform_discord_kick_and_roblox_actions(message: discord.Message, user_id: str, message_type: str, roblox_nickname: str, reason_text: str, author_id: str = None):
     log_channel = client.get_channel(LOG_CHANNEL_ID)
     if not log_channel:
-        logger.error("로그 채널을 찾을 수 없습니다: ID=%s", LOG_CHANNEL_ID)[cite: 2]
+        logger.error("로그 채널을 찾을 수 없습니다: ID=%s", LOG_CHANNEL_ID)
         return
 
     ten_hours_ago = datetime.now(timezone.utc) - timedelta(hours=10)
@@ -965,17 +965,17 @@ async def perform_discord_kick_and_roblox_actions(message: discord.Message, user
                 break
 
     except Exception as exc:
-        logger.exception("로그 채널 히스토리 조회 중 오류 발생: %s", exc)[cite: 2]
+        logger.exception("로그 채널 히스토리 조회 중 오류 발생: %s", exc)
         return
 
     if not has_valid_log:
-        logger.info("10시간 이내 해당 유저(%s)가 직접 생성한(크리에이터) 유효한 티켓 로그 기록이 없어 추방하지 않습니다.", user_id)[cite: 2]
+        logger.info("10시간 이내 해당 유저(%s)가 직접 생성한(크리에이터) 유효한 티켓 로그 기록이 없어 추방하지 않습니다.", user_id)
         await add_warning_reaction_and_alert(message, "10시간 이내 로그 채널에 해당 유저가 직접 생성한(크리에이터) 유효한 티켓 기록이 없음", message_type, user_id, roblox_nickname, reason_text, author_id)
         return
 
     guild = client.get_guild(EDUCATION_GUILD_ID)
     if not guild:
-        logger.error("디스코드 교육사 서버를 찾을 수 없습니다: ID=%s", EDUCATION_GUILD_ID)[cite: 2]
+        logger.error("디스코드 교육사 서버를 찾을 수 없습니다: ID=%s", EDUCATION_GUILD_ID)
         return
 
     try:
@@ -986,19 +986,19 @@ async def perform_discord_kick_and_roblox_actions(message: discord.Message, user
                 await message.add_reaction("☑️")
             except Exception:
                 pass
-            logger.info("디스코드 교육사 서버에서 유저 추방 완료: user_id=%s", user_id)[cite: 2]
+            logger.info("디스코드 교육사 서버에서 유저 추방 완료: user_id=%s", user_id)
     except discord.Forbidden:
-        logger.error("봇의 디스코드 추방 권한이 부족합니다.")[cite: 2]
+        logger.error("봇의 디스코드 추방 권한이 부족합니다.")
         await add_warning_reaction_and_alert(message, "봇의 디스코드 서버 추방 권한 부족 (Forbidden)", message_type, user_id, roblox_nickname, reason_text, author_id)
         return
     except discord.NotFound:
-        logger.info("디스코드 교육사 서버에 해당 사용자가 이미 존재하지 않습니다: user_id=%s", user_id)[cite: 2]
+        logger.info("디스코드 교육사 서버에 해당 사용자가 이미 존재하지 않습니다: user_id=%s", user_id)
         try:
             await message.add_reaction("☑️")
         except Exception:
             pass
     except Exception as exc:
-        logger.exception("디스코드 추방 처리 중 오류 발생: %s", exc)[cite: 2]
+        logger.exception("디스코드 추방 처리 중 오류 발생: %s", exc)
         await add_warning_reaction_and_alert(message, f"디스코드 추방 처리 중 예외 발생: {exc}", message_type, user_id, roblox_nickname, reason_text, author_id)
         return
 
@@ -1008,7 +1008,7 @@ async def perform_discord_kick_and_roblox_actions(message: discord.Message, user
 
 
 async def sync_history_to_sheet(channel):
-    logger.info("봇 시작: 시트의 기존 데이터를 보존하며 누락된 히스토리를 동기화합니다...")[cite: 2]
+    logger.info("봇 시작: 시트의 기존 데이터를 보존하며 누락된 히스토리를 동기화합니다...")
     try:
         existing_rows = WORKSHEET.get_all_values()
         headers = ["일시", "주차", "유형", "유저 ID", "로블록스 닉네임", "사유", "분류"]
@@ -1062,16 +1062,16 @@ async def sync_history_to_sheet(channel):
 
         if messages_to_add:
             WORKSHEET.append_rows(messages_to_add, value_input_option="USER_ENTERED")
-            logger.info("구글 시트 동기화 완료: 누락된 데이터 %d건 추가됨", len(messages_to_add))[cite: 2]
+            logger.info("구글 시트 동기화 완료: 누락된 데이터 %d건 추가됨", len(messages_to_add))
         else:
-            logger.info("구글 시트 동기화 완료: 추가할 누락된 데이터가 없습니다.")[cite: 2]
+            logger.info("구글 시트 동기화 완료: 추가할 누락된 데이터가 없습니다.")
 
     except Exception as exc:
-        logger.exception("히스토리 동기화 중 오류 발생: %s", exc)[cite: 2]
+        logger.exception("히스토리 동기화 중 오류 발생: %s", exc)
 
 
 # ---------------------------------------------------------------------------
-# 슬래시 명령어 및 이벤트[cite: 2]
+# 슬래시 명령어 및 이벤트
 # ---------------------------------------------------------------------------
 @client.tree.command(
     name="추방요청", 
@@ -1125,10 +1125,10 @@ async def chu_bang(
 
 @client.event
 async def on_ready():
-    logger.info("디스코드 봇 로그인 완료: %s", client.user)[cite: 2]
+    logger.info("디스코드 봇 로그인 완료: %s", client.user)
     channel = client.get_channel(TARGET_CHANNEL_ID)
     if not channel:
-        logger.error("지정된 타겟 채널을 찾을 수 없습니다: ID=%s", TARGET_CHANNEL_ID)[cite: 2]
+        logger.error("지정된 타겟 채널을 찾을 수 없습니다: ID=%s", TARGET_CHANNEL_ID)
         return
 
     await sync_history_to_sheet(channel)
@@ -1163,7 +1163,7 @@ async def on_message(message: discord.Message):
         await send_admin_warning_alert(message, "타겟 채널에서 감지된 전출·전역 신청 대기 건", message_type, user_id, roblox_nickname, reason_text, author_id=author_id)
 
     except Exception as exc:
-        logger.exception("메시지 처리 중 알 수 없는 오류 발생: %s", exc)[cite: 2]
+        logger.exception("메시지 처리 중 알 수 없는 오류 발생: %s", exc)
 
 
 def main():
@@ -1171,7 +1171,7 @@ def main():
     try:
         client.run(DISCORD_TOKEN)
     except Exception as exc:
-        logger.exception("디스코드 봇 실행 중 치명적 오류 발생: %s", exc)[cite: 2]
+        logger.exception("디스코드 봇 실행 중 치명적 오류 발생: %s", exc)
         raise
 
 
