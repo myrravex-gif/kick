@@ -16,8 +16,15 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from dotenv import load_dotenv
 
-# .env 파일 로드 (로컬 환경용, Wispbyte에서는 시스템 환경 변수를 그대로 사용)
-load_dotenv()
+# ---------------------------------------------------------------------------
+# 환경 변수 안전 로드 (빈 .env 파일이 시스템 환경 변수를 덮어쓰는 현상 방지)
+# ---------------------------------------------------------------------------
+if os.path.exists(".env"):
+    load_dotenv(override=False)
+    # .env 파일 내부에 값이 비어있는 변수가 있을 경우 시스템 환경 변수가 유지되도록 빈 값 제거
+    for key, value in list(os.environ.items()):
+        if value == "":
+            os.environ.pop(key, None)
 
 # ---------------------------------------------------------------------------
 # 로깅 설정
@@ -68,7 +75,7 @@ def validate_env_vars():
     if missing:
         raise EnvironmentError(
             f"필수 환경 변수가 설정되지 않았습니다: {', '.join(missing)}. "
-            "Wispbyte 환경 변수 또는 .env 파일을 확인해주세요."
+            "Railway Variables 또는 .env 파일을 확인해주세요."
         )
 
     try:
